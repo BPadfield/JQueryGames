@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+var currentGame = 'TTT';
+function makeTTTGame() 
+{
+	currentGame = 'TTT';
+	var gameSpace = $("#gameSpace");
+	gameSpace.empty();
+	gameSpace.width(300);
+    var turn = 'X';
+    var moves = 0;
+    var winCombos = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+    var gameOver = false;
+	var table = gameSpace.append('<table/>');
+	for(i=0;i<3;i++)
+		{
+		var row = table.append('<tr/>');
+		row.append('<td/>');
+		row.append('<td/>');
+		row.append('<td/>');
+		}
+	var squares = $('td');
+
+	squares.click(function() {
+		if (!gameOver) {
+			if (this.textContent === '') {
+				this.textContent = turn;
+				moves++;
+				if (checkForWin(turn)) {
+					gameOver = true;
+					alert(turn + ' wins!');
+				} else if (moves === 9) {
+					gameOver = true;
+					alert('It\'s a tie!');
+				} else {
+					turn = (turn === 'X') ? 'O' : 'X';
+				}
+			}
+        }
+    });
+
+    function checkForWin(player) {
+        for (var i = 0; i < winCombos.length; i++) {
+			var win = true;
+			for (var j = 0; j < winCombos[i].length; j++) {
+				if (squares[winCombos[i][j]].textContent !== player) {
+					win = false;
+					break;
+				}
+			}
+			if (win) {
+				return true;
+			}
+		}
+        return false;
+    }
+};
+function jumpingGame(){
+	var jumping = false;
+	var gameOver = false;
+	var gameSpace = $('#gameSpace');
+	gameSpace.width(500);
+	currentGame ='jumping';
+	gameSpace.empty();
+	gameSpace.prepend('<div/>');
+	var dino = gameSpace.children('div').first();
+	dino.attr('id','dino');
+	gameSpace.append('<div id="obstacle"></div>');
+	var obstacle = $('#obstacle');
+	obstacle.attr('id','obstacle');
+
+	var speed = 4;
+	$(document).on("keydown", function(e) {
+    if (e.code === "Space") {
+      jump();
+    }
+	});
+	var gameRefresh = setInterval(move,10);
+	setInterval(collisionCheck,10);
+	function move(){
+		var gap = parseInt(obstacle.css('right'));
+		obstacle.css('right',gap+speed+'px');
+		if (gap>gameSpace.width()){
+			obstacle.css('right','0px')
+		}
+	}
+	
+	function collisionCheck(){
+		if(dino.offset().left+30>obstacle.offset().left&&!gameOver&&!jumping){
+			clearInterval(gameRefresh);
+			gameOver = true;
+			alert('Game Over');
+			gameSpace.empty();
+			
+		}
+	}
+		
+	function jump(){
+		if(!jumping){
+			jumping = true;
+			dino.animate({bottom: '+=150px'}, 'medium',function(){
+			dino.animate({bottom: '-=150px'}, 'medium',function(){jumping = false});});
+		}
+		
+	}
+}
+
+	
+	
+  </script>
+  <style>
+	
+    #gameSpace {
+    width: 500px;
+    height: 300px;
+    margin: 0 auto;
+	background-color:blue;
+	position: relative;
+	margin: 0 auto;
+    }
+	
+    #gameSpace td {
+	border: 1px solid black;
+	width: 98px;
+    height: 98px;
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    vertical-align: middle;
+	background-color:gray;
+	font-family:courier-new;
+
+    }
+	
+	#dino {
+	width: 30px;
+	height: 60px;
+	position: absolute;
+	background-color:red;
+	left: 0;
+	bottom:0;
+	}
+	
+	#obstacle {
+	width: 10px;
+	height: 40px;
+	position: absolute;
+	background-color:green;
+	bottom: 0;
+	right:0;
+	}
+  </style>
+</head>
+<body>
+<button onclick="if(currentGame=='TTT'){jumpingGame()}else{makeTTTGame()};$('#gameSpace').focus()">Play A Game</button>
+  <div id="gameSpace" tabindex='0'>
+    
+  </div>
+</body>
+</html>
