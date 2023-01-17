@@ -3,17 +3,26 @@
 <head>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
+// Keeps track of the active game
 var currentGame = 'TTT';
+// The function to create the TicTacToe game board and start the game
 function makeTTTGame() 
 {
 	currentGame = 'TTT';
+	//get the gameSpace div from the DOM 
 	var gameSpace = $("#gameSpace");
+	//clear the gameSpace from any other games
 	gameSpace.empty();
+	//reset the width of the gameSpace
 	gameSpace.width(300);
-    var turn = 'X';
-    var moves = 0;
-    var winCombos = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
-    var gameOver = false;
+	//curremt Player value
+	var turn = 'X';
+	//move counter
+	var moves = 0;
+	//winning board arrangements
+	var winCombos = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+	var gameOver = false;
+	//add the table, rows and cells to the gameSpace
 	var table = gameSpace.append('<table/>');
 	for(i=0;i<3;i++)
 		{
@@ -22,10 +31,12 @@ function makeTTTGame()
 		row.append('<td/>');
 		row.append('<td/>');
 		}
+	//get all the cells
 	var squares = $('td');
-
+	//add event listener to the cells to check for clicks
 	squares.click(function() {
 		if (!gameOver) {
+			//check if player can go in the cell then check game ending state then  switch players
 			if (this.textContent === '') {
 				this.textContent = turn;
 				moves++;
@@ -41,66 +52,96 @@ function makeTTTGame()
 			}
         }
     });
-
-    function checkForWin(player) {
+	//the function to check for winning board arrangments
+	function checkForWin(player) {
         for (var i = 0; i < winCombos.length; i++) {
+			//set win to true then see if board matches current winCombo
 			var win = true;
 			for (var j = 0; j < winCombos[i].length; j++) {
+				//if match is invalid then set win to false and try the next one
 				if (squares[winCombos[i][j]].textContent !== player) {
 					win = false;
 					break;
 				}
 			}
+			//if  match is found then return true otherwise carry on matching
 			if (win) {
 				return true;
 			}
 		}
+	//no win found so return false
         return false;
     }
 };
+	  
+//The function to create the Jumping game inside of the gameSpace	
 function jumpingGame(){
+	//bool to determine if the dino is jumping
 	var jumping = false;
 	var gameOver = false;
+	//variable to keep track of score
+	var score = 0;
+	//get the gameSpace Div from the DOM
 	var gameSpace = $('#gameSpace');
+	//set the gameSpace width to 500px
 	gameSpace.width(500);
+	//change the active game
 	currentGame ='jumping';
+	//clear the gameSpace
 	gameSpace.empty();
+	//add the div that will be the dino and give it an id 
 	gameSpace.prepend('<div/>');
 	var dino = gameSpace.children('div').first();
 	dino.attr('id','dino');
+	//add the div that will be the obstacle and give it an id
 	gameSpace.append('<div id="obstacle"></div>');
 	var obstacle = $('#obstacle');
 	obstacle.attr('id','obstacle');
-
+	//set the speed of the game - how many pixels for the obstacle to move
 	var speed = 4;
+	//attach an event listener to the space bar and make it run the jump function
 	$(document).on("keydown", function(e) {
     if (e.code === "Space") {
       jump();
     }
 	});
+	//start the game running the move function every 10ms
 	var gameRefresh = setInterval(move,10);
-	setInterval(collisionCheck,10);
+	//function to move the obstacle
 	function move(){
+		//get the gap between the obstacle and the right side of the gameSpace
 		var gap = parseInt(obstacle.css('right'));
+		//move the obstacle speed pixels away from the right side
 		obstacle.css('right',gap+speed+'px');
-		if (gap>gameSpace.width()){
+		//reset the obstacle if it gets all the way across and add one to score
+		if (gap>gameSpace.width()-obstacle.width()){
 			obstacle.css('right','0px')
+			score++;
 		}
+		//check for a collision
+		collisionCheck();
 	}
-	
+	//function to check for a collision between dino and obstacle
 	function collisionCheck(){
-		if(dino.offset().left+30>obstacle.offset().left&&!gameOver&&!jumping){
+		//check to see if dino and obstacle are touching horizontally and the dino is not jumping
+		if(dino.offset().left+dino.width()>obstacle.offset().left&&!gameOver&&!jumping){
+			//stop the game
 			clearInterval(gameRefresh);
 			gameOver = true;
-			alert('Game Over');
+			//tell user the game is over and their score
+			alert('Game Over, Score: '+score);
+			//get rid of game objects
 			gameSpace.empty();
 			
 		}
 	}
-		
+	//function to make the dino jump
 	function jump(){
+		//check dino isn't already jumping
 		if(!jumping){
+			//dino jumping has began so update jumping bool
 			jumping = true;
+			//animate dino going up and down then reset jumping bool
 			dino.animate({bottom: '+=150px'}, 'medium',function(){
 			dino.animate({bottom: '-=150px'}, 'medium',function(){jumping = false});});
 		}
@@ -119,7 +160,6 @@ function jumpingGame(){
     margin: 0 auto;
 	background-color:blue;
 	position: relative;
-	margin: 0 auto;
     }
 	
     #gameSpace td {
